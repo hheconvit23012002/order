@@ -12,3 +12,4 @@ Route::get('/', function () {
 //})->middleware(CheckAuthMiddleware::class);
 //Route::post('/publish', [TestController::class,'publishMessage']);
 //Route::get('/consume', [TestController::class,'consumeMessage']);
+//Route::get('/test', [TestController::class,'test']);

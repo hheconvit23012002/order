@@ -28,6 +28,8 @@ class PingJobCommand extends Command
      */
     public function handle()
     {
+//        $user['email'] = 'hhd';
+//        PingJob::dispatch($user);
         PingJob::dispatch();
 //        return Command::SUCCESS;
     }

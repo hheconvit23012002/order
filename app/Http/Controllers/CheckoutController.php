@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\CheckoutEvent;
 use App\Http\Requests\CheckoutRequest;
 use App\Jobs\PingJob;
 use App\Models\Order;
@@ -14,9 +15,13 @@ class CheckoutController extends Controller
 {
     public function checkout(CheckoutRequest $request){
         try {
+
             DB::beginTransaction();
             $user = $request->get('user');
             $item = $request->get('item');
+
+
+            broadcast(new CheckoutEvent('check validate product'));
 
             $response = Http::withHeaders([
                 "Accept" => "application/json",
@@ -28,6 +33,10 @@ class CheckoutController extends Controller
                 throw new \Exception('validate product failed');
             }
 
+            sleep(10);
+
+            broadcast(new CheckoutEvent('check validate card'));
+
 
             $response = Http::withHeaders([
                 "Accept" => "application/json",
@@ -36,6 +45,10 @@ class CheckoutController extends Controller
             if($response->status() !== 200){
                 throw new \Exception('Card not found');
             }
+
+            sleep(10);
+
+            broadcast(new CheckoutEvent('update product'));
 
 
             $response = Http::withHeaders([
@@ -47,6 +60,10 @@ class CheckoutController extends Controller
             if($response->status() !== 200){
                 throw new \Exception('update product failed');
             }
+
+            sleep(10);
+
+            broadcast(new CheckoutEvent('save order'));
 
             $order = [
                     'user_id' => $user["id"],
@@ -63,6 +80,9 @@ class CheckoutController extends Controller
             }
             $orderId = $response->json();
 
+            sleep(10);
+
+            broadcast(new CheckoutEvent('payment processing'));
 
             $response = Http::withHeaders([
                 "Accept" => "application/json",
@@ -73,6 +93,9 @@ class CheckoutController extends Controller
             if($response->status() !== 200){
                 throw new \Exception('Payment failed');
             }
+
+            sleep(10);
+
 
             PingJob::dispatch($user);
             DB::commit();

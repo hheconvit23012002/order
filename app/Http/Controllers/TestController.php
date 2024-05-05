@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\CheckoutEvent;
 use App\RabbitMQService;
 use Illuminate\Http\Request;
 
@@ -32,5 +33,9 @@ class TestController extends Controller
 
         $rabbitMQService->consume($callback);
     }
+    public function test(){
+        broadcast(new CheckoutEvent('check validate product'));
+    }
+
     //
 }
